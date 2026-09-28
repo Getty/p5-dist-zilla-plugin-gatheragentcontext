@@ -70,7 +70,72 @@ has missing_ok      => (is => 'ro', isa => 'Bool',          default => 1);
 
 sub mvp_multivalue_args { qw(harness dir file exclude_match) }
 
-sub gather_files { }   # implemented in Task 2
+sub _selected_harness {
+  my ($self) = @_;
+  my @h = @{ $self->harness };
+  return @HARNESS_ORDER if !@h || grep { $_ eq 'all' } @h;
+  for my $h (@h) {
+    $self->log_fatal("unknown harness '$h' (known: @HARNESS_ORDER, all)")
+      unless $HARNESS{$h};
+  }
+  return @h;
+}
+
+sub _dirs {
+  my ($self) = @_;
+  return @{ $self->dir } if @{ $self->dir };
+  my (%seen, @dirs);
+  for my $h ($self->_selected_harness) {
+    push @dirs, grep { !$seen{$_}++ } @{ $HARNESS{$h}{dir} };
+  }
+  return @dirs;
+}
+
+sub _files {
+  my ($self) = @_;
+  return @{ $self->file } if @{ $self->file };
+  my (%seen, @files);
+  for my $h ($self->_selected_harness) {
+    push @files, grep { !$seen{$_}++ } @{ $HARNESS{$h}{file} };
+  }
+  return @files;
+}
+
+sub _snapshot {
+  my ($self, $src, $base) = @_;
+  my $rel = $src->relative($base);
+  my $content = eval { $src->slurp_utf8 };
+  $self->log_fatal(
+    "agent-context file '$rel' is not valid UTF-8 (binary content not supported)")
+    unless defined $content;
+  $self->add_file(Dist::Zilla::File::InMemory->new(
+    name    => $self->to . "/$rel",
+    content => $content,
+  ));
+  $self->log_debug("gathered @{[$self->to]}/$rel");
+}
+
+sub gather_files {
+  my ($self) = @_;
+  my $base = path($self->zilla->root)->absolute;
+
+  for my $reldir ($self->_dirs) {
+    $self->log_fatal("agent-context path '$reldir' must be relative")
+      if path($reldir)->is_absolute;
+    my $dir = $base->child($reldir);
+    unless ($dir->is_dir) {
+      $self->log_fatal("agent-context dir '$reldir' not found under @{[$self->zilla->root]}")
+        unless $self->missing_ok;
+      next;
+    }
+    my $iter = $dir->iterator({ recurse => 1, follow_symlinks => 0 });
+    while (my $f = $iter->()) {
+      next unless $f->is_file;
+      next if -l $f;                 # do not snapshot symlinked files
+      $self->_snapshot($f, $base);
+    }
+  }
+}
 
 __PACKAGE__->meta->make_immutable;
 no Moose;
