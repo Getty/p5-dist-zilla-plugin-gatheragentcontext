@@ -1,0 +1,5 @@
+Release history for Dist-Zilla-Plugin-GatherAgentContext
+
+{{$NEXT}}
+    - Initial release: snapshot agent context (.claude/.codex/CLAUDE.md/...)
+      into the build under misc/agent-context/ for build provenance.
