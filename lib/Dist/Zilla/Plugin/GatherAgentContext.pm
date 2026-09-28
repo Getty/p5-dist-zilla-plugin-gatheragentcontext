@@ -142,6 +142,18 @@ sub gather_files {
   my ($self) = @_;
   my $base = path($self->zilla->root)->absolute;
 
+  for my $relfile ($self->_files) {
+    $self->log_fatal("agent-context path '$relfile' must be relative")
+      if path($relfile)->is_absolute;
+    my $src = $base->child($relfile);
+    unless ($src->is_file) {
+      $self->log_fatal("agent-context file '$relfile' not found under @{[$self->zilla->root]}")
+        unless $self->missing_ok;
+      next;
+    }
+    $self->_snapshot($src, $base);
+  }
+
   for my $reldir ($self->_dirs) {
     $self->log_fatal("agent-context path '$reldir' must be relative")
       if path($reldir)->is_absolute;
