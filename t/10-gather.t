@@ -64,14 +64,16 @@ SKIP: {
   my $tzil = build_tzil( files => {
     'source/.claude/skills/real/SKILL.md' => "x\n",
   });
-  my $root = path($tzil->tempdir)->child('source');
+  my $root = path($tzil->root);
   my $link = $root->child('.claude/skills/loop');
-  skip 'symlinks unsupported here', 1
+  skip 'symlinks unsupported here', 2
     unless eval { symlink $root->child('.claude/skills/real'), "$link"; 1 };
   plugin($tzil)->gather_files;
   my @got = gathered($tzil);
-  ok !( grep { m{/skills/loop/} } @got ),
-    'symlinked skill dir is not descended';
+  ok( ( grep { $_ eq 'misc/agent-context/.claude/skills/real/SKILL.md' } @got ),
+    'sanity: the real skill dir was gathered (path anchor correct)' );
+  ok( !( grep { m{/skills/loop/} } @got ),
+    'symlinked skill dir is not descended' );
 }
 
 done_testing;

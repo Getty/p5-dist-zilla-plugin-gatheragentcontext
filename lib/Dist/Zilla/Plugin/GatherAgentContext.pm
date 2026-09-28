@@ -2,6 +2,7 @@ package Dist::Zilla::Plugin::GatherAgentContext;
 # ABSTRACT: Snapshot the agent context (.claude/.codex/CLAUDE.md/AGENTS.md/...) into the build for provenance
 use Moose;
 use Path::Tiny;
+use Encode ();
 use Dist::Zilla::File::InMemory;
 with 'Dist::Zilla::Role::FileGatherer';
 
@@ -101,10 +102,32 @@ sub _files {
   return @files;
 }
 
+sub _exclude_res {
+  my ($self) = @_;
+  my @res = (
+    qr{(?:^|/)[^/]+\.local\.json$},   # settings.local.json, skilletor.local.json (config)
+    qr{(?:^|/)settings\.json$},       # editor/permission config, not agent content
+    qr{(?:^|/)worktrees/},
+    qr{(?:^|/)\.DS_Store$},
+  );
+  push @res, qr{(?:^|/)\.gitignore$} if $self->prune_gitignore;
+  push @res, map { qr/$_/ } @{ $self->exclude_match };
+  return @res;
+}
+
+sub _excluded {
+  my ($self, $relpath) = @_;
+  for my $re ($self->_exclude_res) { return 1 if $relpath =~ $re }
+  return 0;
+}
+
 sub _snapshot {
   my ($self, $src, $base) = @_;
   my $rel = $src->relative($base);
-  my $content = eval { $src->slurp_utf8 };
+  return if $self->_excluded("$rel");
+  # Strict UTF-8 decode: a binary/non-UTF-8 file must fail loud, not be
+  # silently substituted (the lenient :encoding(UTF-8) layer would replace).
+  my $content = eval { Encode::decode('UTF-8', $src->slurp_raw, Encode::FB_CROAK) };
   $self->log_fatal(
     "agent-context file '$rel' is not valid UTF-8 (binary content not supported)")
     unless defined $content;
