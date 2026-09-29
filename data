@@ -1,0 +1,26 @@
+---
+class: standard
+created: 2026-09-29T18:27:39Z
+id: 1
+priority: high
+status: backlog
+tags:
+- release
+- ci
+title: 'Release 0.001 to CPAN: Author::GETTY 0.326 requires it and cannot be installed
+  without'
+updated: 2026-09-29T18:27:39Z
+---
+
+Found 2026-09-29 by the first CI run of Getty/p5-kubernetes-comb (run 36611696953, all three Perl versions).
+
+Dist-Zilla-PluginBundle-Author-GETTY 0.326 went to CPAN on 2026-09-29 17:21 UTC. Its cpanfile requires Dist::Zilla::Plugin::GatherAgentContext 0.001, and its bundle adds the plugin. This distribution has never been released: no tag, Changes still says "Initial release" under {{$NEXT}}, MetaCPAN answers 404 for the module and for the release.
+
+So the bundle cannot be installed from CPAN:
+
+    ! Installing the dependencies failed: Module Dist::Zilla::Plugin::GatherAgentContext is not installed
+    ! Bailing out the installation for Dist-Zilla-PluginBundle-Author-GETTY-0.326.
+
+Every CI that installs the bundle through the shared dzil-test action fails at that step, before any test of the distribution runs. Machines that have the plugin installed from this checkout do not notice.
+
+Needed: the first release of this distribution, by the maintainer. Nothing else in the dependents has to change.
