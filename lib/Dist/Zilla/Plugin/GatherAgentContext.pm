@@ -58,7 +58,8 @@ Base path inside the build. Default C<misc/agent-context>.
 
 =attr exclude_match
 
-Additional exclude regexes (repeatable), applied on top of the built-in ones.
+Additional exclude regexes (repeatable), applied on top of the built-in ones
+(see L</BUILT-IN EXCLUDES>).
 
 =attr prune_gitignore
 
@@ -194,6 +195,52 @@ sub _gather_dir {
     }
   }
 }
+
+=head1 BUILT-IN EXCLUDES
+
+These paths are always skipped, before any L</exclude_match> additions:
+
+=over 4
+
+=item *
+
+Any C<*.local.json> file (for example C<settings.local.json> or
+C<skilletor.local.json>) — local configuration, not agent content.
+
+=item *
+
+C<settings.json> — editor and permission configuration, not agent content.
+
+=item *
+
+Any C<worktrees/> directory — agent worktrees hold full checkouts (thousands
+of files). Such directories are pruned before descent, not walked and then
+discarded leaf by leaf.
+
+=item *
+
+C<.DS_Store>.
+
+=item *
+
+C<.gitignore> files, unless L</prune_gitignore> is set to 0 (skilletor drops a
+per-skill C<.gitignore> as a management marker).
+
+=back
+
+Any excluded directory is pruned before the plugin descends into it, so its
+contents are never stat-walked.
+
+=head1 ENCODING AND SYMLINKS
+
+Files are read and decoded as strict UTF-8. A binary or otherwise non-UTF-8
+file aborts the build with a fatal error rather than being silently
+substituted — snapshot textual agent context, not binaries.
+
+Symlinks are never followed, whether they point at a file or a directory; a
+symlinked path is skipped.
+
+=cut
 
 __PACKAGE__->meta->make_immutable;
 no Moose;
