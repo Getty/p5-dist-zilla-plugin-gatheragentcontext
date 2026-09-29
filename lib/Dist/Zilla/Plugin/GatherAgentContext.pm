@@ -8,6 +8,16 @@ with 'Dist::Zilla::Role::FileGatherer';
 
 our $VERSION = '0.001';
 
+=head1 SYNOPSIS
+
+  ; in your dist.ini
+  [GatherAgentContext]
+
+  ; or narrow what is snapshotted
+  [GatherAgentContext]
+  harness       = claude
+  exclude_match = (?:^|/)secrets/
+
 =head1 DESCRIPTION
 
 Gathers a distribution's B<agent context> from disk into the build under
