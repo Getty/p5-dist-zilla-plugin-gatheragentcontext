@@ -163,11 +163,24 @@ sub gather_files {
         unless $self->missing_ok;
       next;
     }
-    my $iter = $dir->iterator({ recurse => 1, follow_symlinks => 0 });
-    while (my $f = $iter->()) {
-      next unless $f->is_file;
-      next if -l $f;                 # do not snapshot symlinked files
-      $self->_snapshot($f, $base);
+    $self->_gather_dir($dir, $base);
+  }
+}
+
+sub _gather_dir {
+  my ($self, $dir, $base) = @_;
+  for my $child (sort { $a->basename cmp $b->basename } $dir->children) {
+    next if -l $child;               # never follow symlinks (dir or file)
+    if ($child->is_dir) {
+      my $rel = $child->relative($base);
+      # Prune excluded directories before descending: e.g. .claude/worktrees/
+      # holds full agent checkouts (thousands of files) that would otherwise be
+      # stat-walked on every build just to discard every leaf.
+      next if $self->_excluded("$rel/");
+      $self->_gather_dir($child, $base);
+    }
+    elsif ($child->is_file) {
+      $self->_snapshot($child, $base);
     }
   }
 }
