@@ -58,5 +58,5 @@ are STRICTLY forbidden without the maintainer's explicit go-ahead — even if a 
 ## Perl specifics — reference, don't restate
 
 Module loading, Moose classes, attributes, dependency pinning and house style live in skills
-`getty-perl-core`, `getty-perl-moose`, `getty-perl-distribution` (force-loaded for
+`getty-perl-core` and `getty-perl-moose` (force-loaded for
 `gatheragentcontext-*` agents). Do not duplicate that content here.
