@@ -237,8 +237,10 @@ Files are read and decoded as strict UTF-8. A binary or otherwise non-UTF-8
 file aborts the build with a fatal error rather than being silently
 substituted — snapshot textual agent context, not binaries.
 
-Symlinks are never followed, whether they point at a file or a directory; a
-symlinked path is skipped.
+Within the recursive directory walk, symlinks are never followed — a symlinked
+file or subdirectory found while descending is skipped. A top-level path given
+explicitly through L</dir> or L</file> is resolved normally, so a configured
+entry that is itself a symlink is still read.
 
 =cut
 
