@@ -55,6 +55,14 @@ symlink handling, and the tests. Pure prose (README.md, POD prose) is not.
 are STRICTLY forbidden without the maintainer's explicit go-ahead — even if a plan lists
 "release" as the next step. Stop and ask.
 
+## Coordination — karr board (always in scope)
+
+Ticket coordination is the orchestrating agent's job, so `karr` is always in scope — just use it, no need to invoke
+the skill first. Git-native kanban; state lives in `refs/karr/*`; this repo has its own board. Full surface:
+`karr list --compact` · `karr board` · `karr show ID` · `karr create "Title" --priority high --body '…'` ·
+`karr edit ID -a "note"` · `karr move ID in-progress --claim NAME` — skill `kanban-issues-karr-coordination`.
+**Serialize board mutations when fanning out** — collect results, then loop `karr move`/`handoff`/`sync` sequentially.
+
 ## Perl specifics — reference, don't restate
 
 Module loading, Moose classes, attributes, dependency pinning and house style live in skills
