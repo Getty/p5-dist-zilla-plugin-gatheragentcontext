@@ -1,6 +1,6 @@
 Release history for Dist-Zilla-Plugin-GatherAgentContext
 
-{{$NEXT}}
+0.002     2026-10-25 18:38:49Z
     - Local state and secrets below a harness directory can no longer end up
       in the tarball. Below .claude/ and .codex/ only agent content is
       gathered now (agents/, skills/, rules/, hooks/, commands/, CLAUDE.md,
