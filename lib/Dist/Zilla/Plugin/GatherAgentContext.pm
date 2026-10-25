@@ -6,7 +6,7 @@ use Encode ();
 use Dist::Zilla::File::InMemory;
 with 'Dist::Zilla::Role::FileGatherer';
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 
 =head1 SYNOPSIS
 
