@@ -15,7 +15,7 @@ in `.claude/rules/gatheragentcontext-rules.md`.
 | Implement / refactor / debug / test the plugin | `gatheragentcontext-worker` (default) |
 | Commits, `Changes`, pre-release audit | `gatheragentcontext-release-manager` |
 
-The agents carry their skills via `briefing.skills` (see `.claude/agents/`); the main agent
+The agents carry their skills via `skills:` (see `.claude/agents/`); the main agent
 delegates rather than loading them. Skills are installed via skilletor
 (`.claude/skilletor.json`) under `.claude/skills/` and are git-ignored — which is exactly the
 context this very plugin snapshots into a build.
